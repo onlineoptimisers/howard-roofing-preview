@@ -86,31 +86,63 @@ img { max-width: 100%; height: auto; display: block; }
 .section-header h2 { font-size: 36px; color: var(--charcoal); margin-bottom: 12px; }
 .section-header p { color: var(--mid-grey); font-size: 16px; max-width: 560px; margin: 0 auto; }
 
-/* MAP */
+/* SPLIT LAYOUT */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  min-height: calc(100vh - 72px);
+}
+
+.split-map {
+  position: sticky;
+  top: 72px;
+  height: calc(100vh - 72px);
+}
+
 #projectMap {
   width: 100%;
-  height: 480px;
-  border-radius: 12px;
-  border: 2px solid rgba(0,0,0,0.06);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  height: 100%;
+}
+
+.split-cards {
+  background: var(--off-white);
+  padding: 32px 28px;
+  overflow-y: auto;
+}
+
+.split-cards-header {
+  margin-bottom: 24px;
+}
+
+.split-cards-header h2 {
+  font-size: 28px;
+  color: var(--charcoal);
+  margin-bottom: 6px;
+}
+
+.split-cards-header p {
+  color: var(--mid-grey);
+  font-size: 14px;
 }
 
 .map-stats {
   display: flex;
-  justify-content: center;
-  gap: 48px;
-  margin-top: 32px;
+  gap: 24px;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
 }
 
-.map-stat { text-align: center; }
-.map-stat .num { font-family: 'Merriweather', serif; font-size: 36px; font-weight: 900; color: var(--slate-800); }
-.map-stat .label { font-size: 13px; color: var(--mid-grey); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+.map-stat { text-align: center; flex: 1; }
+.map-stat .num { font-family: 'Merriweather', serif; font-size: 28px; font-weight: 900; color: var(--slate-800); }
+.map-stat .label { font-size: 11px; color: var(--mid-grey); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
 
 /* PROJECT CARDS */
 .projects-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .project-card {
@@ -129,8 +161,8 @@ img { max-width: 100%; height: auto; display: block; }
 }
 
 .project-card-img {
-  width: 220px;
-  min-height: 200px;
+  width: 180px;
+  min-height: 160px;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -223,9 +255,10 @@ img { max-width: 100%; height: auto; display: block; }
 .mobile-call-bar a { display: block; width: 100%; background: var(--sand); color: var(--dark); text-align: center; padding: 14px; border-radius: 6px; font-weight: 700; font-size: 16px; }
 
 @media (max-width: 1024px) {
-  .projects-grid { grid-template-columns: 1fr; }
+  .split-layout { grid-template-columns: 1fr; }
+  .split-map { position: relative; top: 0; height: 400px; }
   .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
-  .map-stats { gap: 32px; }
+  .map-stats { gap: 16px; }
 }
 @media (max-width: 768px) {
   body { padding-bottom: 72px; }
@@ -236,9 +269,9 @@ img { max-width: 100%; height: auto; display: block; }
   .nav-inner { height: 64px; }
   .page-hero h1 { font-size: 32px; }
   .page-hero { padding: 80px 0 60px; }
-  #projectMap { height: 360px; }
+  .split-map { height: 320px; }
   .project-card { flex-direction: column; }
-  .project-card-img { width: 100%; min-height: 180px; max-height: 200px; }
+  .project-card-img { width: 100%; min-height: 160px; max-height: 180px; }
   .section-header h2 { font-size: 28px; }
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }
   .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
@@ -305,42 +338,34 @@ img { max-width: 100%; height: auto; display: block; }
   </div>
 </section>
 
-<!-- MAP SECTION -->
-<section class="section section-white">
-  <div class="container">
-    <div class="section-header">
-      <div class="eyebrow eyebrow-dark">Service Coverage</div>
-      <h2>Where We Have Worked</h2>
-      <p>Over a decade of projects across Eastern North Carolina. Click any pin to see details.</p>
-    </div>
+<!-- SPLIT: MAP LEFT + CARDS RIGHT -->
+<div class="split-layout">
+  <div class="split-map">
     <div id="projectMap"></div>
+  </div>
+  <div class="split-cards">
+    <div class="split-cards-header">
+      <div class="eyebrow eyebrow-dark">Completed Work</div>
+      <h2>Featured Projects</h2>
+      <p>Click any project to see it on the map.</p>
+    </div>
     <div class="map-stats">
       <div class="map-stat">
         <div class="num">10+</div>
-        <div class="label">Years Active</div>
+        <div class="label">Years</div>
       </div>
       <div class="map-stat">
         <div class="num">200+</div>
-        <div class="label">Projects Completed</div>
+        <div class="label">Projects</div>
       </div>
       <div class="map-stat">
         <div class="num">59</div>
-        <div class="label">5-Star Reviews</div>
+        <div class="label">Reviews</div>
       </div>
       <div class="map-stat">
         <div class="num">10</div>
-        <div class="label">Towns Served</div>
+        <div class="label">Towns</div>
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- PROJECT GRID -->
-<section class="section section-off-white">
-  <div class="container">
-    <div class="section-header">
-      <div class="eyebrow eyebrow-dark">Completed Work</div>
-      <h2>Featured Projects</h2>
     </div>
     <div class="projects-grid">
 
@@ -476,7 +501,7 @@ img { max-width: 100%; height: auto; display: block; }
 
     </div>
   </div>
-</section>
+</div>
 
 <!-- CTA -->
 <section class="cta-section">
@@ -598,7 +623,9 @@ function flyTo(lat, lng) {
       }, 1300);
     }
   });
-  document.getElementById('projectMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (window.innerWidth <= 1024) {
+    document.getElementById('projectMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 </script>
 
