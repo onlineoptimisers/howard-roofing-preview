@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Projects | Howard Roofing & Construction | Wilmington NC</title>
+<meta name="description" content="Browse completed roofing and construction projects across Wilmington, Hampstead, Rocky Point, Leland, and Eastern NC. See our work on the map.">
+<link rel="icon" href="https://irp.cdn-website.com/deec75cf/site_favicon_16_1753974054295.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Merriweather:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --slate-900: #1e293b; --slate-800: #1e3a5f; --slate-700: #334155; --slate-600: #475569;
+  --sand: #d4a853; --sand-light: #e8c97a; --sand-muted: #c49a3e;
+  --white: #ffffff; --off-white: #f8f7f4; --warm-grey: #f0ece6;
+  --charcoal: #2c2c2c; --dark: #1a1a1a; --mid-grey: #6b7280; --light-grey: #9ca3af;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', -apple-system, sans-serif; color: var(--charcoal); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { font-family: 'Merriweather', Georgia, serif; font-weight: 700; line-height: 1.2; }
+a { color: inherit; text-decoration: none; transition: color 0.2s; }
+img { max-width: 100%; height: auto; display: block; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.eyebrow { font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sand); margin-bottom: 12px; }
+.eyebrow-dark { color: var(--slate-800); }
+.btn { display: inline-block; padding: 14px 32px; font-family: 'Inter', sans-serif; font-size: 15px; font-weight: 600; border-radius: 4px; cursor: pointer; transition: all 0.25s; border: none; text-align: center; }
+.btn-primary { background: var(--sand); color: var(--dark); }
+.btn-primary:hover { background: var(--sand-light); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(212,168,83,0.3); }
+.btn-secondary { background: transparent; color: var(--white); border: 2px solid rgba(255,255,255,0.4); }
+.btn-secondary:hover { border-color: var(--white); background: rgba(255,255,255,0.08); }
+
+/* TOPBAR */
+.topbar { background: var(--slate-900); color: rgba(255,255,255,0.8); font-size: 13px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.topbar-inner { display: flex; justify-content: space-between; align-items: center; }
+.topbar a { color: var(--sand-light); }
+.topbar a:hover { color: var(--white); }
+.topbar-right { display: flex; gap: 24px; align-items: center; }
+.topbar-right a { display: flex; align-items: center; gap: 6px; }
+
+/* NAV */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(30,41,59,0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.06); }
+.nav-inner { display: flex; justify-content: space-between; align-items: center; height: 72px; }
+.nav-logo img { height: 48px; width: auto; }
+.nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+.nav-links a { color: rgba(255,255,255,0.85); font-size: 14px; font-weight: 500; letter-spacing: 0.02em; position: relative; padding: 4px 0; }
+.nav-links a::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: var(--sand); transition: width 0.3s; }
+.nav-links a:hover { color: var(--white); }
+.nav-links a:hover::after { width: 100%; }
+.nav-links a.active { color: var(--sand); }
+.nav-links a.active::after { width: 100%; }
+.nav-cta { background: var(--sand) !important; color: var(--dark) !important; padding: 10px 24px !important; border-radius: 4px !important; font-weight: 600 !important; }
+.nav-cta::after { display: none !important; }
+.nav-cta:hover { background: var(--sand-light) !important; }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; z-index: 200; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--white); transition: all 0.3s; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+.mobile-menu { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--slate-900); z-index: 150; flex-direction: column; justify-content: center; align-items: center; gap: 28px; }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { color: var(--white); font-size: 20px; font-weight: 500; }
+.mobile-menu a:hover { color: var(--sand); }
+
+/* PAGE HERO */
+.page-hero { position: relative; padding: 100px 0 80px; background: var(--slate-900); overflow: hidden; }
+.page-hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.2; }
+.page-hero-overlay { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(30,41,59,0.94) 0%, rgba(30,58,95,0.85) 100%); }
+.page-hero-content { position: relative; z-index: 2; max-width: 700px; }
+.page-hero h1 { font-size: 44px; color: var(--white); margin-bottom: 16px; }
+.page-hero p { font-size: 18px; color: rgba(255,255,255,0.75); line-height: 1.7; }
+.page-hero .breadcrumb { margin-bottom: 16px; font-size: 13px; }
+.page-hero .breadcrumb a { color: var(--sand); }
+.page-hero .breadcrumb span { color: rgba(255,255,255,0.5); }
+
+/* SECTIONS */
+.section { padding: 80px 0; }
+.section-white { background: var(--white); }
+.section-off-white { background: var(--off-white); }
+.section-warm { background: var(--warm-grey); }
+.section-dark { background: var(--slate-900); }
+.section-header { text-align: center; margin-bottom: 48px; }
+.section-header h2 { font-size: 36px; color: var(--charcoal); margin-bottom: 12px; }
+.section-header p { color: var(--mid-grey); font-size: 16px; max-width: 560px; margin: 0 auto; }
+
+/* MAP */
+#projectMap {
+  width: 100%;
+  height: 480px;
+  border-radius: 12px;
+  border: 2px solid rgba(0,0,0,0.06);
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+.map-stats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  margin-top: 32px;
+}
+
+.map-stat { text-align: center; }
+.map-stat .num { font-family: 'Merriweather', serif; font-size: 36px; font-weight: 900; color: var(--slate-800); }
+.map-stat .label { font-size: 13px; color: var(--mid-grey); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4px; }
+
+/* PROJECT CARDS */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.project-card {
+  display: flex;
+  background: var(--white);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,0.06);
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+}
+
+.project-card-img {
+  width: 220px;
+  min-height: 200px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.project-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.project-card:hover .project-card-img img {
+  transform: scale(1.06);
+}
+
+.project-card-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.project-card-body .tag {
+  display: inline-block;
+  background: rgba(30,58,95,0.08);
+  color: var(--slate-800);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  width: fit-content;
+}
+
+.project-card-body h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  color: var(--charcoal);
+}
+
+.project-card-body p {
+  font-size: 14px;
+  color: var(--mid-grey);
+  line-height: 1.55;
+  margin-bottom: 10px;
+}
+
+.project-card-body .location {
+  font-size: 13px;
+  color: var(--sand-muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.project-card-body .location svg {
+  width: 14px;
+  height: 14px;
+  stroke: var(--sand-muted);
+  fill: none;
+  stroke-width: 2;
+}
+
+/* CTA */
+.cta-section { background: var(--slate-800); padding: 72px 0; text-align: center; }
+.cta-section h2 { font-size: 36px; color: var(--white); margin-bottom: 12px; }
+.cta-section p { color: rgba(255,255,255,0.7); font-size: 17px; margin-bottom: 28px; max-width: 520px; margin-left: auto; margin-right: auto; }
+.cta-phone { font-family: 'Merriweather', serif; font-size: 28px; font-weight: 700; color: var(--sand); display: block; margin-bottom: 24px; }
+.cta-buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+/* FOOTER */
+.footer { background: var(--dark); padding: 60px 0 0; color: rgba(255,255,255,0.6); }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand img { height: 44px; margin-bottom: 16px; }
+.footer-brand p { font-size: 14px; line-height: 1.6; }
+.footer h4 { color: var(--white); font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px; }
+.footer-links { list-style: none; }
+.footer-links li { margin-bottom: 10px; }
+.footer-links a { font-size: 14px; color: rgba(255,255,255,0.55); transition: color 0.2s; }
+.footer-links a:hover { color: var(--sand); }
+.footer-contact-item { display: flex; align-items: start; gap: 10px; margin-bottom: 14px; font-size: 14px; }
+.footer-contact-item svg { width: 16px; height: 16px; stroke: var(--sand); fill: none; stroke-width: 1.5; flex-shrink: 0; margin-top: 3px; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.08); padding: 20px 0; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+
+/* MOBILE CALL BAR */
+.mobile-call-bar { display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 999; background: var(--slate-900); padding: 12px 16px; border-top: 2px solid var(--sand); }
+.mobile-call-bar a { display: block; width: 100%; background: var(--sand); color: var(--dark); text-align: center; padding: 14px; border-radius: 6px; font-weight: 700; font-size: 16px; }
+
+@media (max-width: 1024px) {
+  .projects-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .map-stats { gap: 32px; }
+}
+@media (max-width: 768px) {
+  body { padding-bottom: 72px; }
+  .mobile-call-bar { display: block; }
+  .topbar { display: none; }
+  .hamburger { display: flex; }
+  .nav-links { display: none; }
+  .nav-inner { height: 64px; }
+  .page-hero h1 { font-size: 32px; }
+  .page-hero { padding: 80px 0 60px; }
+  #projectMap { height: 360px; }
+  .project-card { flex-direction: column; }
+  .project-card-img { width: 100%; min-height: 180px; max-height: 200px; }
+  .section-header h2 { font-size: 28px; }
+  .footer-grid { grid-template-columns: 1fr; gap: 28px; }
+  .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+  .map-stats { flex-wrap: wrap; gap: 20px; }
+  .map-stat .num { font-size: 28px; }
+  .cta-section h2 { font-size: 28px; }
+  .cta-phone { font-size: 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- MOBILE CALL BAR -->
+<div class="mobile-call-bar"><a href="tel:+19105407726">Call Now - (910) 540-7726</a></div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="container topbar-inner">
+    <span>Serving Wilmington, Hampstead, Rocky Point & Eastern NC</span>
+    <div class="topbar-right">
+      <a href="mailto:info@howardroofingconstruction.com"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg> info@howardroofingconstruction.com</a>
+      <a href="tel:+19105407726"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> (910) 540-7726</a>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="nav-logo"><img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/Final-logo-300+x+120-Tranparent-1920w.png" alt="Howard Roofing & Construction" loading="eager"></a>
+    <ul class="nav-links">
+      <li><a href="services.html">Services</a></li>
+      <li><a href="roof-replacement.html">Roof Replacement</a></li>
+      <li><a href="kitchen-remodeling.html">Kitchen Remodeling</a></li>
+      <li><a href="projects.html" class="active">Projects</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+      <li><a href="tel:+19105407726" class="nav-cta">Free Estimate</a></li>
+    </ul>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="index.html">Home</a>
+  <a href="services.html">Services</a>
+  <a href="roof-replacement.html">Roof Replacement</a>
+  <a href="kitchen-remodeling.html">Kitchen Remodeling</a>
+  <a href="projects.html" style="color:var(--sand);">Projects</a>
+  <a href="about.html">About</a>
+  <a href="contact.html">Contact</a>
+  <a href="tel:+19105407726" style="color:var(--sand);font-weight:700;">Call (910) 540-7726</a>
+</div>
+
+<!-- PAGE HERO -->
+<section class="page-hero">
+  <div class="page-hero-bg" style="background-image:url('https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/roofing-company-terra-court-condominiums-wilmington-nc-roof-replacement-and-siding.webp-1920w.webp');"></div>
+  <div class="page-hero-overlay"></div>
+  <div class="container page-hero-content">
+    <div class="breadcrumb"><a href="index.html">Home</a> <span>/</span> <span style="color:rgba(255,255,255,0.7);">Projects</span></div>
+    <div class="eyebrow">Our Work</div>
+    <h1>Projects Across Eastern NC</h1>
+    <p>Browse completed roofing and construction projects in Wilmington, Hampstead, Rocky Point, Leland, and surrounding areas. Every pin on the map is a satisfied customer.</p>
+  </div>
+</section>
+
+<!-- MAP SECTION -->
+<section class="section section-white">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow eyebrow-dark">Service Coverage</div>
+      <h2>Where We Have Worked</h2>
+      <p>Over a decade of projects across Eastern North Carolina. Click any pin to see details.</p>
+    </div>
+    <div id="projectMap"></div>
+    <div class="map-stats">
+      <div class="map-stat">
+        <div class="num">10+</div>
+        <div class="label">Years Active</div>
+      </div>
+      <div class="map-stat">
+        <div class="num">200+</div>
+        <div class="label">Projects Completed</div>
+      </div>
+      <div class="map-stat">
+        <div class="num">59</div>
+        <div class="label">5-Star Reviews</div>
+      </div>
+      <div class="map-stat">
+        <div class="num">10</div>
+        <div class="label">Towns Served</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECT GRID -->
+<section class="section section-off-white">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow eyebrow-dark">Completed Work</div>
+      <h2>Featured Projects</h2>
+    </div>
+    <div class="projects-grid">
+
+      <!-- Project 1 -->
+      <div class="project-card" onclick="flyTo(34.2960, -77.8120)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/Best_roofing_company_porterneck_NC.Photo1-1920w.jpg" alt="GAF Timberline HDZ roof replacement Porters Neck NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">Roof Replacement</span>
+          <h3>GAF Timberline HDZ - Hickory Blend</h3>
+          <p>Full tear-off and replacement for a retired veteran's home. Architectural shingles with ridge vent and new flashing throughout.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Porters Neck, Wilmington</div>
+        </div>
+      </div>
+
+      <!-- Project 2 -->
+      <div class="project-card" onclick="flyTo(34.3864, -77.7758)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/roofing-company-terra-court-condominiums-wilmington-nc-roof-replacement-and-siding.webp-1920w.webp" alt="Condominium roof replacement Wilmington NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">Commercial Roofing</span>
+          <h3>Tara Court Condominiums - Full Roof & Siding</h3>
+          <p>Multi-unit condominium complex. Complete roof replacement plus siding restoration across all buildings. HOA-managed project.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Downtown Wilmington</div>
+        </div>
+      </div>
+
+      <!-- Project 3 -->
+      <div class="project-card" onclick="flyTo(34.1540, -78.0640)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/expert-roofing-company-lake-waccamaw-north-carolina-roof-system-1920w.webp" alt="Full roof and window replacement Lake Waccamaw NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">Roof + Windows</span>
+          <h3>Full Roof System with New Windows</h3>
+          <p>Complete roof replacement paired with new energy-efficient windows and siding repair. Lakefront property requiring extra moisture protection.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Lake Waccamaw</div>
+        </div>
+      </div>
+
+      <!-- Project 4 -->
+      <div class="project-card" onclick="flyTo(34.4520, -77.9210)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/roofing-company-burgaw-nc-underlayment-prep-installation-1920w.webp" alt="Roof underlayment prep Burgaw NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">Roof Replacement</span>
+          <h3>Highway 53 - Shingle Replacement</h3>
+          <p>3,200 sq ft residential roof. Full tear-off, new synthetic underlayment, GAF Timberline HDZ in Weathered Wood. Completed in 2 days.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Burgaw</div>
+        </div>
+      </div>
+
+      <!-- Project 5 -->
+      <div class="project-card" onclick="flyTo(34.2358, -77.8750)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/garage-build-finished-wilmington-nc.webp-1920w.webp" alt="Completed garage build Wilmington NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">New Construction</span>
+          <h3>Detached Garage Build - Start to Finish</h3>
+          <p>Full garage construction from slab to shingles. Framing, housewrap, siding, roofing, trim, paint, and electrical. 4-week build.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Wilmington (Midtown)</div>
+        </div>
+      </div>
+
+      <!-- Project 6 -->
+      <div class="project-card" onclick="flyTo(34.3380, -77.6850)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/howard-roofing-construction-company-service-truck-wilmington-nc.-1920w.webp" alt="Howard Roofing service truck Jacksonville NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">Metal Roofing</span>
+          <h3>Standing Seam Metal - Coastal Ranch</h3>
+          <p>2,800 sq ft standing seam metal roof in charcoal grey. Concealed fasteners, snow guards, and custom ridge cap. Built to handle 150+ MPH winds.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Hampstead</div>
+        </div>
+      </div>
+
+      <!-- Project 7 -->
+      <div class="project-card" onclick="flyTo(34.2710, -77.8950)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/nicehouse1-1920w.jpg" alt="Beautiful home with new roof Wilmington NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">Roof Replacement</span>
+          <h3>Coastal Craftsman - Full Roof System</h3>
+          <p>Premium home in Landfall. GAF Timberline HDZ with StainGuard Plus, new gutters, and full soffit ventilation upgrade. 3-day install.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Landfall, Wilmington</div>
+        </div>
+      </div>
+
+      <!-- Project 8 -->
+      <div class="project-card" onclick="flyTo(34.3420, -77.9460)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/garage-build-framing-wilmington-nc-1920w.webp" alt="Garage framing in progress Rocky Point NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">New Construction</span>
+          <h3>Workshop + Storage Building</h3>
+          <p>Custom 24x30 detached workshop with covered porch. Full framing, metal roofing, and electrical. Designed as a home workshop for a woodworker.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Rocky Point</div>
+        </div>
+      </div>
+
+      <!-- Project 9 -->
+      <div class="project-card" onclick="flyTo(34.2130, -78.0170)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/garage-build-housewrap-wilmington-nc-1920w.webp" alt="House wrap installation Leland NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">Storm Damage</span>
+          <h3>Hurricane Recovery - Roof + Siding</h3>
+          <p>Emergency tarping within 24 hours of the storm. Full roof replacement and siding repair over 3 weeks. Insurance claim managed from start to finish.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Leland</div>
+        </div>
+      </div>
+
+      <!-- Project 10 -->
+      <div class="project-card" onclick="flyTo(33.9182, -78.0196)">
+        <div class="project-card-img">
+          <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/garage-build-trim-paint-wilmington-nc.webp-1920w.webp" alt="Trim and paint Southport NC" loading="lazy">
+        </div>
+        <div class="project-card-body">
+          <span class="tag">Remodeling</span>
+          <h3>Exterior Renovation - Trim, Siding & Paint</h3>
+          <p>Complete exterior facelift for a 1970s ranch. New HardiePlank siding, PVC trim, and full exterior paint. Increased curb appeal and weather protection.</p>
+          <div class="location"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Southport</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2>Ready to Start Your Project?</h2>
+    <p>Get a free estimate on your roofing or construction project. No pressure, no obligation.</p>
+    <a href="tel:+19105407726" class="cta-phone">(910) 540-7726</a>
+    <div class="cta-buttons">
+      <a href="tel:+19105407726" class="btn btn-primary">Call Now</a>
+      <a href="mailto:info@howardroofingconstruction.com" class="btn btn-secondary">Email Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="https://lirp.cdn-website.com/deec75cf/dms3rep/multi/opt/Final-logo-300+x+120-Tranparent-1920w.png" alt="Howard Roofing & Construction" loading="lazy">
+        <p>Veteran-led, family-owned roofing and construction company serving Wilmington and Eastern North Carolina since 2016.</p>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <ul class="footer-links">
+          <li><a href="roof-replacement.html">Roof Replacement</a></li>
+          <li><a href="services.html">Metal Roofing</a></li>
+          <li><a href="services.html">Shingle Roofing</a></li>
+          <li><a href="services.html">Storm Damage</a></li>
+          <li><a href="kitchen-remodeling.html">Kitchen Remodeling</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul class="footer-links">
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="services.html">All Services</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <a href="tel:+19105407726">(910) 540-7726</a>
+        </div>
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>
+          <a href="mailto:info@howardroofingconstruction.com">info@howardroofingconstruction.com</a>
+        </div>
+        <div class="footer-contact-item">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          Wilmington, NC
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Howard Roofing & Construction. All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Mobile Menu
+function toggleMenu() {
+  var menu = document.getElementById('mobileMenu');
+  var hamburger = document.querySelector('.hamburger');
+  menu.classList.toggle('open');
+  hamburger.classList.toggle('open');
+  document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+}
+
+// Leaflet Map
+var map = L.map('projectMap').setView([34.27, -77.87], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
+  maxZoom: 18
+}).addTo(map);
+
+var goldIcon = L.divIcon({
+  className: 'custom-pin',
+  html: '<div style="width:28px;height:28px;background:#d4a853;border:3px solid #1e293b;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,0.3);"></div>',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14],
+  popupAnchor: [0, -16]
+});
+
+var projects = [
+  { lat: 34.2960, lng: -77.8120, title: 'GAF Timberline HDZ - Hickory Blend', type: 'Roof Replacement', loc: 'Porters Neck' },
+  { lat: 34.3864, lng: -77.7758, title: 'Tara Court Condominiums', type: 'Commercial Roofing', loc: 'Downtown Wilmington' },
+  { lat: 34.1540, lng: -78.0640, title: 'Full Roof System + Windows', type: 'Roof + Windows', loc: 'Lake Waccamaw' },
+  { lat: 34.4520, lng: -77.9210, title: 'Highway 53 Shingle Replacement', type: 'Roof Replacement', loc: 'Burgaw' },
+  { lat: 34.2358, lng: -77.8750, title: 'Detached Garage Build', type: 'New Construction', loc: 'Wilmington (Midtown)' },
+  { lat: 34.3380, lng: -77.6850, title: 'Standing Seam Metal Roof', type: 'Metal Roofing', loc: 'Hampstead' },
+  { lat: 34.2710, lng: -77.8950, title: 'Coastal Craftsman Full Roof', type: 'Roof Replacement', loc: 'Landfall, Wilmington' },
+  { lat: 34.3420, lng: -77.9460, title: 'Workshop + Storage Building', type: 'New Construction', loc: 'Rocky Point' },
+  { lat: 34.2130, lng: -78.0170, title: 'Hurricane Recovery - Roof + Siding', type: 'Storm Damage', loc: 'Leland' },
+  { lat: 33.9182, lng: -78.0196, title: 'Exterior Renovation', type: 'Remodeling', loc: 'Southport' }
+];
+
+projects.forEach(function(p) {
+  L.marker([p.lat, p.lng], { icon: goldIcon })
+    .addTo(map)
+    .bindPopup('<div style="font-family:Inter,sans-serif;min-width:180px;"><strong style="font-size:14px;display:block;margin-bottom:4px;">' + p.title + '</strong><span style="font-size:12px;color:#6b7280;display:block;margin-bottom:2px;">' + p.type + '</span><span style="font-size:12px;color:#c49a3e;font-weight:600;">' + p.loc + '</span></div>');
+});
+
+function flyTo(lat, lng) {
+  map.flyTo([lat, lng], 14, { duration: 1.2 });
+  projects.forEach(function(p) {
+    if (p.lat === lat && p.lng === lng) {
+      setTimeout(function() {
+        map.eachLayer(function(layer) {
+          if (layer.getLatLng && Math.abs(layer.getLatLng().lat - lat) < 0.001) {
+            layer.openPopup();
+          }
+        });
+      }, 1300);
+    }
+  });
+  document.getElementById('projectMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+
+</body>
+</html>
